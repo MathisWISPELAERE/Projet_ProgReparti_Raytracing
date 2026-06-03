@@ -12,9 +12,12 @@ public class ClientMain {
         try {
              // On récupère le nom/IP de la machine locale pour identifier ce client
             // Si on passe un argument en ligne de commande on l'utilise à la place
+            if (args.length == 0) {
+                System.out.println("Lancer le client avec au moins un argument :\n\t - ClientMain IPServer {NomClient}");
+            }
             InetAddress localhost = InetAddress.getLocalHost();
-            String clientName = args.length > 0 ? args[0] : ""+localhost.getHostName()+" : "+localhost.getHostAddress();
-            Registry registry = LocateRegistry.getRegistry(args[1], 1099);
+            String clientName = args.length > 1 ? args[1] : ""+localhost.getHostName()+" : "+localhost.getHostAddress();
+            Registry registry = LocateRegistry.getRegistry(args[0], 1099);
             ServerInterface server = (ServerInterface) registry.lookup("ServeurRaytracing");
 
             ClientInterface client = new ClientImpl(clientName);
