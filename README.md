@@ -1,7 +1,7 @@
 ### Projet : Raytracing
 
 ## Groupe
-- Hannezo Florien
+- Hannezo Florian
 - Keiser Kenan
 - PAQUIN Guillaume
 - WISPELAERE Mathis
