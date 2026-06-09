@@ -7,6 +7,7 @@ import java.rmi.registry.Registry;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -47,12 +48,9 @@ public class ServerMain {
         reg.rebind("ServeurRaytracing", server);
         System.out.println("Serveur prêt.");
 
-        String fichierDescription = "simple.txt";
-        int largeur = 512, hauteur = 512;
-
-        if (args.length > 0) fichierDescription = args[0];
-        if (args.length > 1) largeur = Integer.parseInt(args[1]);
-        if (args.length > 2) hauteur = Integer.parseInt(args[2]);
+        String fichierDescription = args.length > 0 ? args[0] : "simple.txt";
+        int largeur = args.length > 1 ? Integer.parseInt(args[1]) : 512; 
+        int hauteur = args.length > 2 ? Integer.parseInt(args[2]) : 512;
 
         Disp disp = new Disp("Raytracer", largeur, hauteur);
         Scene scene = new Scene(fichierDescription, largeur, hauteur);
@@ -111,13 +109,17 @@ public class ServerMain {
                 while ((cas = cases.poll()) != null) {
                     Point t = cas;
                     try {
-                        Image img = client.compute(scene, t, tw, th);
+                        List<Image> imgs = client.compute(scene, t, tw, th);
 
-                        // synchronized sur disp pour éviter que deux threads
-                        // se marche dessus et fasse bug l'affichage
-                        // donc on attends que disp ai fini d'afficher toutes l'image avant de passer continuer
+                        // Les 4 sous-tuiles sont dans l'ordre HG, HD, BG, BD
+                        int sw = tw / 2;
+                        int sh = th / 2;
+                        int[][] offsets = {{0, 0}, {sw, 0}, {0, sh}, {sw, sh}};
+
                         synchronized (disp) {
-                            disp.setImage(img, t.x, t.y);
+                            for (int i = 0; i < imgs.size(); i++) {
+                                disp.setImage(imgs.get(i), t.x + offsets[i][0], t.y + offsets[i][1]);
+                            }
                         }
 
                         int n = fini.incrementAndGet();
